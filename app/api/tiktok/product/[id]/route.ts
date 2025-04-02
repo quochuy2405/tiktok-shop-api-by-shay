@@ -13,7 +13,7 @@ async function fetchProductData(productId: string) {
 		});
 		if (response.ok) {
 			const data = await response.text(); // Nhận dữ liệu dưới dạng text (HTML)
-			return data;
+			return JSON.parse(data);
 		} else {
 			console.error(`Request failed with status: ${response.status}`);
 			return null;
@@ -27,6 +27,6 @@ async function fetchProductData(productId: string) {
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 
-  const data: any = await fetchProductData(id);
-	return new Response(data);
+	const data: any = await fetchProductData(id);
+	return Response.json({ data });
 }
