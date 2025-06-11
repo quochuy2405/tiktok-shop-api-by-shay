@@ -1,103 +1,163 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+
+interface ProductData {
+  success: boolean;
+  data: any;
+  source?: string;
+  error?: string;
+  message?: string;
+  productId: string;
+  region: string;
+  locale: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [productId, setProductId] = useState('1731434312432060118');
+  const [region, setRegion] = useState('VN');
+  const [locale, setLocale] = useState('vi');
+  const [loading, setLoading] = useState(false);
+  const [productData, setProductData] = useState<ProductData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const fetchProduct = async () => {
+    if (!productId.trim()) {
+      setError('Vui lòng nhập Product ID');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setProductData(null);
+
+    try {
+      const response = await fetch(`/api/tiktok/product/${productId}?region=${region}&locale=${locale}`);
+      const data: ProductData = await response.json();
+      
+      if (response.ok) {
+        setProductData(data);
+      } else {
+        setError(`Lỗi ${response.status}: ${data.message || 'Không thể lấy dữ liệu sản phẩm'}`);
+      }
+    } catch (err) {
+      setError('Lỗi kết nối: ' + (err instanceof Error ? err.message : 'Lỗi không xác định'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">TikTok Shop API - Lấy thông tin sản phẩm</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Product ID
+              </label>
+              <input
+                type="text"
+                value={productId}
+                onChange={(e) => setProductId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập Product ID"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Region
+              </label>
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="VN">Vietnam (VN)</option>
+                <option value="US">United States (US)</option>
+                <option value="UK">United Kingdom (UK)</option>
+                <option value="SG">Singapore (SG)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Locale
+              </label>
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="vi">Tiếng Việt (vi)</option>
+                <option value="en">English (en)</option>
+              </select>
+            </div>
+          </div>
+          
+          <button
+            onClick={fetchProduct}
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium py-2 px-4 rounded-md transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            {loading ? 'Đang tải...' : 'Lấy thông tin sản phẩm'}
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <strong>Lỗi:</strong> {error}
+          </div>
+        )}
+
+        {productData && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-bold text-gray-800">Thông tin sản phẩm</h2>
+                <span className={`px-3 py-1 rounded-full text-sm ${
+                  productData.success 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {productData.success ? 'Thành công' : 'Thất bại'}
+                </span>
+              </div>
+              
+              <div className="text-sm text-gray-600 mb-4">
+                <p><strong>Product ID:</strong> {productData.productId}</p>
+                <p><strong>Region:</strong> {productData.region}</p>
+                <p><strong>Locale:</strong> {productData.locale}</p>
+                {productData.source && <p><strong>Nguồn dữ liệu:</strong> {productData.source}</p>}
+              </div>
+            </div>
+
+            {productData.success ? (
+              <div className="border-t pt-4">
+                <h3 className="text-lg font-semibold mb-3">Dữ liệu sản phẩm:</h3>
+                <div className="bg-gray-100 rounded-md p-4 overflow-auto max-h-96">
+                  <pre className="text-sm text-gray-800 whitespace-pre-wrap">
+                    {JSON.stringify(productData.data, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            ) : (
+              <div className="border-t pt-4 text-red-600">
+                <p><strong>Lỗi:</strong> {productData.error}</p>
+                <p><strong>Thông báo:</strong> {productData.message}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-6 text-center text-gray-600 text-sm">
+          <p>API endpoint: <code className="bg-gray-200 px-2 py-1 rounded">/api/tiktok/product/[id]</code></p>
+          <p className="mt-2">Curl command được chuyển đổi thành API Next.js với đầy đủ headers và cookies</p>
+        </div>
+      </div>
     </div>
   );
 }
