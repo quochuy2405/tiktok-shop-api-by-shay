@@ -128,10 +128,7 @@ export default function Home() {
               </div>
               
               <div className="text-sm text-gray-600 mb-4">
-                <p><strong>Product ID:</strong> {productData.productId}</p>
-                <p><strong>Region:</strong> {productData.region}</p>
-                <p><strong>Locale:</strong> {productData.locale}</p>
-                {productData.source && <p><strong>Nguồn dữ liệu:</strong> {productData.source}</p>}
+              {JSON.stringify(productData)}
               </div>
             </div>
 
